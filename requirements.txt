@@ -1,3 +1,6 @@
 numpy
 tifffile 
 imagecodecs
+pyvista 
+rasterio
+typing_extensions

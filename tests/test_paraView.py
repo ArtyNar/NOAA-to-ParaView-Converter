@@ -1,6 +1,6 @@
 import sys, os 
-
-sys.path.append(r"C:\Program Files\ParaView 5.13.2\bin\Lib\site-packages") 
+# Point to ParaView python libraries
+sys.path.insert(0, r"C:\Program Files\ParaView 5.13.2\bin\Lib\site-packages")
 os.add_dll_directory(r"C:\Program Files\ParaView 5.13.2\bin") 
 
 from paraview.simple import * 

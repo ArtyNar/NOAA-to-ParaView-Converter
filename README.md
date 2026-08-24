@@ -6,6 +6,8 @@ The script reads an elevation raster, masks out NODATA values, builds a `vtkImag
 
 ![Bathymetry render](images/bathymetry.png)
 
+> Area of interest on the screenshot: West -125.33030416613947, South 45.568749228801046, East -124.61069967395203, North 45.860247378725035
+
 ## Requirements
 
 - Windows with [ParaView](https://www.paraview.org/download/) installed (developed against 5.13.2)
