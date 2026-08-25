@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <VTKFile type="ImageData" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
-  <ImageData WholeExtent="0 863 0 349 0 0" Origin="0 0 0" Spacing="1 1 1" Direction="1 0 0 0 1 0 0 0 1">
+  <ImageData WholeExtent="0 863 0 349 0 0" Origin="0 0 0" Spacing="90 90 1" Direction="1 0 0 0 1 0 0 0 1">
     <Piece Extent="0 863 0 349 0 0"                                                   >
       <PointData Scalars="Elevation">
         <DataArray type="Float64" Name="Elevation" format="appended" RangeMin="-2164.0268555"        RangeMax="-173.12371826"        offset="0"                   />

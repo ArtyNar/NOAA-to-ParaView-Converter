@@ -30,7 +30,7 @@ ny, nx = elevation.shape
 # --- Build vtkImageData directly ---
 image_data = vtk.vtkImageData()
 image_data.SetDimensions(nx, ny, 1)
-image_data.SetSpacing(1, 1, 1)
+image_data.SetSpacing(90,90,1) # Comes from dataset cell size
 image_data.SetOrigin(0, 0, 0)
 
 values = elevation.ravel(order='C')  # Flattens row by row
@@ -46,18 +46,27 @@ producer.UpdatePipeline()
 # --- Warp into 3D relief ---
 warp = WarpByScalar(Input=producer)
 warp.Scalars = ['POINTS', 'Elevation']
-warp.ScaleFactor = 0.05
+warp.ScaleFactor = 10
 
 display = Show(warp)
 ColorBy(display, ('POINTS', 'Elevation'))
 display.SetScalarBarVisibility(GetActiveView(), True)
 display.RescaleTransferFunctionToDataRange(True)
 
+colorTF = GetColorTransferFunction('Elevation')
+colorBar = GetScalarBar(colorTF, GetActiveView())
+
+# Prettify the numeral formatting
+colorBar.AutomaticLabelFormat = 0
+colorBar.LabelFormat = '%.0f'
+colorBar.RangeLabelFormat = '%.0f'
+
 ResetCamera()
 Render()
 SaveScreenshot(r'.\images\bathymetry.png')
 Interact()
 
+# Save to vti
 from vtkmodules.vtkIOXML import vtkXMLImageDataWriter
 
 writer = vtkXMLImageDataWriter()

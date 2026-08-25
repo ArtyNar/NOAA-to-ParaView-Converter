@@ -1,21 +1,24 @@
 # NOAA to ParaView Converter
 
-Convert NOAA bathymetric elevation exports (GeoTIFF) into 3D relief visualizations rendered with [ParaView](https://www.paraview.org/)'s Python API.
+Convert NOAA bathymetric elevation exports (GeoTIFF) into 3D relief visualizations.
 
-The script reads an elevation raster, masks out NODATA values, builds a `vtkImageData` grid from the elevation array, warps it into a 3D surface by elevation, and renders it colored by depth/height.
+Two independent converters are provided, both following the same pipeline: read an elevation raster, mask out NODATA values, build a structured grid from the elevation array, warp it into a 3D surface by elevation, and render it colored by depth/height.
+
+- **[geotiff_to_vtk.py](geotiff_to_vtk.py)** — uses ParaView's Python API (`paraview.simple`), driving an actual ParaView render/export.
+- **[geotiff_pyvista.py](geotiff_pyvista.py)** — uses [PyVista](https://pyvista.org/) instead, so it runs in a plain Python environment with no ParaView installation required.
 
 ![Bathymetry render](images/bathymetry.png)
 
 > [!NOTE]
-> Area of interest on the screenshot: 
+> Area of interest on the screenshot:
 >
 > West -125.33030416613947, South 45.568749228801046, East -124.61069967395203, North 45.860247378725035
 
 ## Requirements
 
-- Windows with [ParaView](https://www.paraview.org/download/) installed (developed against 5.13.2)
-- Python 3.10 (must match the Python version bundled with your ParaView install)
-- Python packages in [requirements.txt](requirements.txt): `numpy`, `tifffile`, `imagecodecs`
+- Python 3.10
+- Python packages in [requirements.txt](requirements.txt): `numpy`, `tifffile`, `imagecodecs`, `pyvista`, `rasterio`, `typing_extensions`
+- For [geotiff_to_vtk.py](geotiff_to_vtk.py) and the ParaView smoke test only: Windows with [ParaView](https://www.paraview.org/download/) installed (developed against 5.13.2), matching the venv's Python version
 
 ## Setup
 
@@ -37,10 +40,10 @@ The script reads an elevation raster, masks out NODATA values, builds a `vtkImag
    pip install -r requirements.txt
    ```
 
-4. Point the scripts at your local ParaView install. Each script starts with:
+4. If you're using [geotiff_to_vtk.py](geotiff_to_vtk.py) or the ParaView smoke test, point them at your local ParaView install. They start with:
 
    ```python
-   sys.path.append(r"C:\Program Files\ParaView 5.13.2\bin\Lib\site-packages")
+   sys.path.insert(0, r"C:\Program Files\ParaView 5.13.2\bin\Lib\site-packages")
    os.add_dll_directory(r"C:\Program Files\ParaView 5.13.2\bin")
    ```
 
@@ -48,30 +51,39 @@ The script reads an elevation raster, masks out NODATA values, builds a `vtkImag
 
 ## Usage
 
-- **`test1.py`** — minimal smoke test. Renders a cone in ParaView to confirm the venv can import `paraview.simple` and the DLL path is set up correctly.
+- **[geotiff_to_vtk.py](geotiff_to_vtk.py)** — reads `data/exportImage.tiff` with `tifffile`, cleans NODATA values, builds a `vtkImageData` grid, warps it into a 3D relief via ParaView's `WarpByScalar`, colors it by elevation, saves the render to `images/bathymetry.png`, and writes the grid to `output/bathymetry.vti`.
 
   ```powershell
-  python test1.py
+  python geotiff_to_vtk.py
   ```
 
-- **`test2.py`** — the converter. Reads `data/exportImage.tiff`, cleans NODATA values, builds a VTK image grid from the elevation data, warps it into a 3D relief, colors it by elevation, and saves the render to `images/bathymetry.png`.
+  Calls `Interact()` at the end, which opens an interactive ParaView render window — close it (or press `q`) to end the script.
+
+- **[geotiff_pyvista.py](geotiff_pyvista.py)** — reads `data/exportImage.tiff` with `rasterio`, cleans NODATA values, builds a PyVista `ImageData` grid, warps it into a 3D relief, and opens an interactive PyVista render window colored by elevation, saving a screenshot to `bathymetry.png`.
 
   ```powershell
-  python test2.py
+  python geotiff_pyvista.py
   ```
 
-  Both scripts call `Interact()` at the end, which opens an interactive ParaView render window — close it (or press `q`) to end the script.
+- **[tests/test_paraView.py](tests/test_paraView.py)** — minimal smoke test. Renders a cone in ParaView to confirm the venv can import `paraview.simple` and the DLL path is set up correctly, saving a screenshot to `images/screenshot.png`.
+
+  ```powershell
+  python tests/test_paraView.py
+  ```
 
 ## Data
 
-`data/exportImage.tiff` is expected to be a single-band elevation GeoTIFF exported from a NOAA bathymetry source (e.g. the [NOAA NCEI Bathymetric Data Viewer](https://www.ncei.noaa.gov/maps/bathymetry/)), with invalid/NODATA cells encoded as extreme sentinel values (`< -1e30` or `> 1e30`). Swap in your own export at that path, or edit the path in `test2.py`.
+`data/exportImage.tiff` is expected to be a single-band elevation GeoTIFF exported from a NOAA bathymetry source (e.g. the [NOAA NCEI Bathymetric Data Viewer](https://www.ncei.noaa.gov/maps/bathymetry/)), with invalid/NODATA cells encoded as extreme sentinel values (for [geotiff_to_vtk.py](geotiff_to_vtk.py)) or via the raster's `nodata` metadata (for [geotiff_pyvista.py](geotiff_pyvista.py)). Swap in your own export at that path, or edit the path in the scripts.
 
 ## Project structure
 
 ```
-data/exportImage.tiff   NOAA elevation GeoTIFF input
-images/bathymetry.png   Rendered output from test2.py
-test1.py                ParaView smoke test
-test2.py                TIFF -> VTK -> 3D relief converter
-requirements.txt        Python dependencies
+data/exportImage.tiff      NOAA elevation GeoTIFF input
+images/bathymetry.png      Rendered output from geotiff_to_vtk.py
+images/screenshot.png      Rendered output from tests/test_paraView.py
+output/bathymetry.vti      VTK image data export from geotiff_to_vtk.py
+geotiff_to_vtk.py          TIFF -> VTK -> 3D relief converter (ParaView)
+geotiff_pyvista.py         TIFF -> VTK -> 3D relief converter (PyVista)
+tests/test_paraView.py     ParaView smoke test
+requirements.txt           Python dependencies
 ```

@@ -18,13 +18,22 @@ elevation_filled = np.nan_to_num(elevation, nan=fill_value)
 ny, nx = elevation_filled.shape
 
 # --- Build a structured grid directly from the array ---
-grid = pv.ImageData(dimensions=(nx, ny, 1), spacing=(1, 1, 1), origin=(0, 0, 0))
+grid = pv.ImageData(dimensions=(nx, ny, 1), spacing=(90, 90, 1), origin=(0, 0, 0))
 grid.point_data['elevation'] = elevation_filled.ravel(order='C')
 
 # --- Warp into 3D relief ---
-warped = grid.warp_by_scalar('elevation', factor=0.05)
+warped = grid.warp_by_scalar('elevation', factor=10)
 
 # --- Plot ---
 plotter = pv.Plotter()
-plotter.add_mesh(warped, scalars='elevation', cmap='viridis', show_scalar_bar=True)
+plotter.add_mesh(
+    warped,
+    scalars='elevation',
+    cmap='viridis',
+    show_scalar_bar=True,
+    scalar_bar_args={
+        'fmt': '%.0f',       
+        'title': 'Elevation (m)',
+    }
+)
 plotter.show(screenshot='bathymetry.png')
