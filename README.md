@@ -7,7 +7,12 @@ Two independent converters are provided, both following the same pipeline: read 
 - **[geotiff_to_vtk.py](geotiff_to_vtk.py)** — uses ParaView's Python API (`paraview.simple`), driving an actual ParaView render/export.
 - **[geotiff_pyvista.py](geotiff_pyvista.py)** — uses [PyVista](https://pyvista.org/) instead, so it runs in a plain Python environment with no ParaView installation required.
 
-![Bathymetry render](images/bathymetry.png)
+<table>
+  <tr>
+    <td><img src="images/bathymetry_paraview.png" alt="Bathymetry render" width="500"></td>
+    <td><img src="images/bathymetry_pyvista.png" alt="Bathymetry render" width="500"></td>
+  </tr>
+</table>
 
 > [!NOTE]
 > Area of interest on the screenshot:

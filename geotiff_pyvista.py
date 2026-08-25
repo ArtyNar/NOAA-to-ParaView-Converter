@@ -7,6 +7,11 @@ with rasterio.open('./data/exportImage.tiff') as src:
     nodata = src.nodata
     transform = src.transform
 
+print("transform:", transform)
+print("x resolution:", transform.a)
+print("y resolution:", transform.e)
+print("origin x:", transform.c)
+print("origin y:", transform.f)
 print("raw:", elevation.shape, elevation.min(), elevation.max(), "nodata:", nodata)
 
 if nodata is not None:
@@ -25,15 +30,21 @@ grid.point_data['elevation'] = elevation_filled.ravel(order='C')
 warped = grid.warp_by_scalar('elevation', factor=10)
 
 # --- Plot ---
-plotter = pv.Plotter()
+plotter = pv.Plotter(off_screen=True)
+
 plotter.add_mesh(
     warped,
     scalars='elevation',
     cmap='viridis',
     show_scalar_bar=True,
     scalar_bar_args={
-        'fmt': '%.0f',       
+        'fmt': '%.0f',
         'title': 'Elevation (m)',
     }
 )
-plotter.show(screenshot='bathymetry.png')
+plotter.show(
+    screenshot='./images/bathymetry_pyvista.png',
+    auto_close=True,
+)
+# plotter.show()
+

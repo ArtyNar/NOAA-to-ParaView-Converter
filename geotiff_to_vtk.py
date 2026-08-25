@@ -63,7 +63,7 @@ colorBar.RangeLabelFormat = '%.0f'
 
 ResetCamera()
 Render()
-SaveScreenshot(r'.\images\bathymetry.png')
+SaveScreenshot(r'.\images\bathymetry_paraview.png')
 Interact()
 
 # Save to vti
