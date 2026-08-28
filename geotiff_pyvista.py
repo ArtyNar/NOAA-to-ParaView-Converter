@@ -20,31 +20,15 @@ if nodata is not None:
 fill_value = np.nanmin(elevation)
 elevation_filled = np.nan_to_num(elevation, nan=fill_value)
 
-ny, nx = elevation_filled.shape
+ny, nx = elevation.shape
+mesh = pv.ImageData(dimensions=(nx, ny, 1), spacing=(90, 90, 1), origin=(0, 0, 0))
+mesh.point_data['Elevation'] = elevation_filled.ravel(order='C')
 
-# --- Build a structured grid directly from the array ---
-grid = pv.ImageData(dimensions=(nx, ny, 1), spacing=(90, 90, 1), origin=(0, 0, 0))
-grid.point_data['elevation'] = elevation_filled.ravel(order='C')
+warped = mesh.warp_by_scalar('Elevation', factor=5) 
+surf = warped.extract_surface().triangulate() # Necessary for decimate_pro
+# surf = surf.decimate_pro(.5)  # Performance lever
 
-# --- Warp into 3D relief ---
-warped = grid.warp_by_scalar('elevation', factor=10)
-
-# --- Plot ---
-plotter = pv.Plotter(off_screen=True)
-
-plotter.add_mesh(
-    warped,
-    scalars='elevation',
-    cmap='viridis',
-    show_scalar_bar=True,
-    scalar_bar_args={
-        'fmt': '%.0f',
-        'title': 'Elevation (m)',
-    }
+surf.plot(
+    cmap='gist_earth',
+    scalar_bar_args={'fmt': '%.0f', 'title': 'Elevation (m)'}
 )
-plotter.show(
-    screenshot='./images/bathymetry_pyvista.png',
-    auto_close=True,
-)
-# plotter.show()
-
